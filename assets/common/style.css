@@ -1,0 +1,182 @@
+:root {
+  --r-background-color: #111;
+  --r-main-font: Open Sans, sans-serif;
+  --r-main-font-size: 40px;
+  --r-main-color: #eee;
+  --r-block-margin: 20px;
+  --r-heading-margin: 0 0 20px 0;
+  --r-heading-font: Montserrat, Impact, sans-serif;
+  --r-heading-color: #eee;
+  --r-heading-line-height: 1.2;
+  --r-heading-letter-spacing: -0.03em;
+  --r-heading-text-transform: none;
+  --r-heading-text-shadow: none;
+  --r-heading-font-weight: 700;
+  --r-heading1-text-shadow: none;
+  --r-heading1-size: 3.77em;
+  --r-heading2-size: 2.11em;
+  --r-heading3-size: 1.55em;
+  --r-heading4-size: 1em;
+  --r-code-font: monospace;
+  --r-link-color: #e716ff;
+  --r-link-color-dark: #bf1bf6;
+  --r-link-color-hover: #f3d7ac;
+  --r-selection-background-color: #a742ff;
+  --r-selection-color: #fff;
+}
+
+svg[id^="mermaid"] {
+    height: 90% !important;
+    max-width: none !important;
+}
+
+.edgeLabel {
+    line-height: 1 !important
+}
+
+.label {
+    line-height: 1 !important
+}
+
+.asciinema-terminal {
+    border-radius: 20px;
+}
+
+.asciinema-player {
+    border-radius: 20px !important;
+    /*border-bottom-left-radius: 20px !important;*/
+    /*border-bottom-right-radius: 20px !important;*/
+}
+
+.control-bar.seekable {
+    height: 80px;
+    bottom: -80px;
+}
+
+.asciinema-player .control-bar .playback-button {
+    height: 48px;
+    width: 48px;
+    padding: 15px;
+}
+
+.asciinema-player .control-bar .timer {
+    width: 50px;
+    font-size: 22px;
+    line-height: 80px;
+}
+
+.asciinema-player .control-bar .progressbar .bar {
+    display: block;
+    cursor: default;
+    height: 100%;
+    padding-top: 34px;
+    padding-left: 10px;
+    font-size: 0;
+}
+
+.window-frame {
+    padding: 20px;
+    background: #111;
+    border-radius: 20px !important;
+}
+
+.top-bar {
+    display: flex;
+    align-content: flex-start;
+    flex-direction: row;
+}
+
+.control {
+    display: inline-block;
+    width: 30px;
+    height: 30px;
+    margin-left: 20px;
+    margin-top: 16px;
+    margin-bottom: 16px;
+    background: white;
+    border-radius: 50%;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    cursor: pointer;
+}
+
+.control.min {
+    background: #ef1281;
+}
+
+.control.max {
+    background: #ffca00;
+}
+
+.control.close {
+    background: #00d700;
+}
+
+
+.asciinema-player .control-bar .progressbar .bar .gutter {
+    display: block;
+    height: 8px;
+    background-color: #333;
+}
+
+
+.asciinema-player .control-bar .fullscreen-button {
+    height: 48px;
+    width: 48px;
+    padding: 15px;
+}
+
+
+.asciinema-player .control-bar .fullscreen-button svg {
+    height: 48px;
+    width: 48px;
+}
+
+.asciinema-player .control-bar .playback-button svg {
+    height: 48px;
+    width: 48px;
+}
+
+
+section.present {
+    display: flex !important;
+    flex-direction: column;
+    justify-items: center;
+}
+
+foreignObject {
+    height: 20px !important;
+}
+
+.reveal .slides section .fragment.highlight-current-red.current-fragment {
+    color: var(--r-selection-background-color);
+}
+
+.caption {
+    position: relative;
+    font-size: 30px;
+    color: var(--r-selection-background-color);
+    float: right;
+    right: calc(-500px);
+    bottom: 0;
+}
+
+/*.asciinema-player.asciinema-theme-asciinema {*/
+/*    min-height: 708px !important;*/
+/*    min-width: 1240px !important;*/
+/*}*/
+
+/*.asciinema-terminal {*/
+/*    font-size: 275% !important;*/
+/*}*/
+
+.reveal pre {
+    font-size: 0.8em;
+    width: auto;
+    display: inline-block;
+}
+
+.footer {
+  position: absolute;
+  left: 35%;
+  bottom: 1em;
+}

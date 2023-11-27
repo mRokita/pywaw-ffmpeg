@@ -1,0 +1,427 @@
+<!doctype html>
+<html lang="pl">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>FFMpeg + Python</title>
+    <link rel="stylesheet" href="assets/common/reveal.css">
+    <link rel="stylesheet" href="assets/common/night.css">
+    <link rel="stylesheet" href="assets/common/hljs-ir-black.min.css">
+    <link rel="stylesheet" href="assets/common/asciinema-player.css">
+    <link rel="stylesheet" href="assets/common/style.css">
+</head>
+
+<body>
+<div class="reveal">
+    <div class="slides">
+        <section>
+            <section>
+                <h2>FFMpeg + Python
+                </h2>
+            </section>
+            <section data-markdown>
+                <textarea data-template>
+                    ## What is FFMpeg exactly?
+
+                    - A versatile tool for multimidedia processing.
+                    - Used internally by Google Chrome, Audacity, Blender, OBS Studio, Emby/Jellyfin and many more.
+                    - Built in 2000 by Fabrice Bellard.
+                </textarea>
+            </section>
+        </section>
+        <section>
+            <section>
+                <h2>ffprobe</h2>
+                    <pre><code data-trim data-noescape>
+                    ffprobe -hide_banner video2.mp4
+                    </code></pre>
+                        <pre class="r-stretch"><code data-trim data-noescape data-line-numbers="1|2-6|7|8-16|17-22">
+                        Input #0, mov,mp4,m4a,3gp,3g2,mj2, from 'video2.mp4':
+                          Metadata:
+                            major_brand     : isom
+                            minor_version   : 512
+                            compatible_brands: isomiso2avc1mp41
+                            encoder         : Lavf58.76.100
+                          Duration: 00:00:07.92, start: 0.000000, bitrate: 2839 kb/s
+                          Stream #0:0(jpn):
+                                Video: h264 (High 10) (avc1 / 0x31637661),
+                                       yuv420p10le(tv, bt709),
+                                       1920x1080 (SAR 1:1 DAR 16:9),
+                                       2513 kb/s, 23.98 fps,
+                                       23.98 tbr, 24k tbn, 47.95 tbc (default)
+                                Metadata:
+                                  handler_name    : Video
+                                  vendor_id       : [0][0][0][0]
+                          Stream #0:1(jpn):
+                                Audio: aac (LC) (mp4a / 0x6134706D),
+                                       48000 Hz, 5.1, fltp, 342 kb/s (default)
+                                Metadata:
+                                  handler_name    : Audio
+                                  vendor_id       : [0][0][0][0]
+                      </code></pre>
+            </section>
+            <section>
+                <h2>Trimming a video file</h2>
+                <pre><code data-trim data-noescape>
+                    ffmpeg -hide_banner -i video.mp4 \
+                        -ss 00:00:30 -t 10 \
+                        -y video_trim.mp4
+                </code></pre>
+            </section>
+            <section data-background-color="var(--r-selection-background-color)">
+                <h2>Original video</h2>
+                <video data-autoplay loop src="assets/viofo_ph.mp4"></video>
+            </section>
+
+            <section data-background-color="var(--r-selection-background-color)">
+                <h2>Edge detection using ffmpeg</h2>
+                <div class="window-frame">
+                    <div class="top-bar">
+                        <div class="control min"></div>
+                        <div class="control max"></div>
+                        <div class="control close"></div>
+                    </div>
+                    <div class="asciinema"
+                         data-cast="assets/edge_detect.cast"></div>
+                </div>
+            </section>
+            <section data-background-color="var(--r-selection-background-color)">
+                <video data-autoplay loop src="assets/outputs/canny_edge_viofo.mp4"></video>
+            </section>
+            <section>
+                <h2>Complex filtering</h2>
+                <pre class="r-stretch"><code data-trim data-noescape>
+                    ffmpeg -hide_banner -i viofo_ph.mp4 \
+                      -filter_complex \
+                      "[0]format=gbrp,histogram=display_mode=stack[hist];\
+                      [hist]scale=iw*2:ih[hist_scaled];\
+                      [0]edgedetect,scale=iw/4:ih/4[edges];\
+                      [0][hist_scaled]overlay[hist_over];\
+                      [hist_over][edges]overlay=x=800:y=0" \
+                      -y outputs/histogram.mp4
+                </code></pre>
+            </section>
+
+            <section>
+            <div class="mermaid r-stretch">
+                graph TD
+                video.mp4 --> 0
+                0 --> |format=gbrp,<div></div>histogram=display_mode=stack| hist
+                hist -->|scale=iw*2:ih| hist_scaled
+                0 -->|edgedetect,scale=iw/4:ih/4| edges
+                0 -->|overlay - arg1| hist_over
+                hist_scaled -->|overlay - arg2| hist_over
+                hist_over --> out[outputs/histogram.mp4]
+                edges -->|overlay=x=800:y=0| out[outputs/histogram.mp4]
+            </div>
+                </section>
+            <section data-background-color="var(--r-selection-background-color)">
+                <video data-autoplay loop src="assets/outputs/histogram.mp4"></video>
+            </section>
+          </section>
+          <section>
+              <section>
+                  <h1>ffmpeg-python</h1>
+              </section>
+              <section>
+                  <h2>ffmpeg-python</h2>
+                  <ul>
+                      <li><a href="https://github.com/kkroening/ffmpeg-python">https://github.com/kkroening/ffmpeg-python</a></li>
+                      <li>A convinient binding for ffmpeg.</li>
+                      <li>Generates ffmpeg arguments from your Python code.</li>
+                      <li>Provides helper functions for running ffmpeg in a subprocess.</li>
+                      <li>Includes a <pre>ffmpeg.probe</pre> function which returns <pre>ffprobe</pre> results as a Python <pre>dict</pre></li>
+                  </ul>
+              </section>
+              <section>
+                  <h2>Complex filtering in Python</h2>
+                  <pre class="r-stretch"><code data-trim data-noescape data-line-numbers="1|3|5-10|12-16|18|20|22-25" class="python">
+                    import ffmpeg
+
+                    input_video = ffmpeg.input("viofo_ph.mp4")
+
+                    hist = (
+                        input_video
+                        .filter("format", "gbrp")
+                        .filter("histogram", display_mode="stack")
+                        .filter("scale", "iw*2", "ih")
+                    )
+
+                    edges = (
+                        input_video
+                        .filter("edgedetect")
+                        .filter("scale", "iw/4", "ih/4")
+                    )
+
+                    hist_overlay = input_video.overlay(hist)
+
+                    out_stream = hist_overlay.overlay(edges, x=800, y=0)
+
+                    out_stream.output(
+                        f"outputs/histogram_python.mp4"
+                    ).overwrite_output().run()
+                  </code></pre>
+              </section>
+              <section>
+                  <h2>Generated ffmpeg call</h2>
+                  <pre><code data-trim data-noescape>
+                      ffmpeg -i viofo_ph.mp4 -filter_complex \
+                                "[0]format=gbrp[s0];\
+                                [s0]histogram=display_mode=stack[s1];\
+                                [s1]scale=iw*2:ih[s2];\
+                                [0][s2]overlay=eof_action=repeat[s3];\
+                                [0]edgedetect[s4];[s4]scale=iw/4:ih/4[s5];\
+                                [s3][s5]overlay=eof_action=repeat:x=800:y=0[s6]" \
+                             -map [s6] outputs/histogram_python.mp4
+                  </code></pre>
+              </section>
+            <section data-background-color="var(--r-selection-background-color)">
+                <video data-autoplay loop src="assets/outputs/histogram_python.mp4"></video>
+            </section>
+          </section>
+          <section>
+              <section>
+                <h2>FFMpeg + Python + OpenCV</h2>
+              </section>
+            <section data-background-color="var(--r-selection-background-color)">
+                <h2>Original video</h2>
+                <video data-autoplay loop src="assets/registration_plates.mp4"></video>
+            </section>
+              <section>
+                <h2>FFMpeg + Python + OpenCV</h2>
+                  <div class="mermaid r-stretch">
+                graph TD
+                  subgraph ffmpeg process #1
+                      a[outputs/registration_plates.mp4] --> b[decompressed frames]
+                  end
+                  subgraph Python
+                      b -->|stdout, deserialisation| c[numpy array]
+                      c -->|cv2 + cv2.CascadeClassifier| d[find registration plates, mark them]
+                  end
+                  subgraph ffmpeg process #2
+                      d -->|stdin, serialisation| e[raw frames]
+                      e --> f[outputs/registration_plates_marked.mp4]
+                  end
+
+            </div>
+              </section>
+              <section>
+                  <h2>FFMpeg + Python + OpenCV</h2>
+                  <pre class="r-stretch"><code data-trim data-noescape data-line-numbers="1-5|7-8|10-11|34-43|45-50|52-63|69-81|83-85" class="python">
+                        from typing import Sequence
+
+                        import ffmpeg
+                        import numpy as np
+                        import cv2
+
+                        INPUT_FILE = "viofo.mp4"
+                        OUTPUT_FILE = "outputs/viofo_marked.mp4"
+
+                        def mark_plates(frame: cv2.typing.MatLike,
+                                        found_plates: Sequence[cv2.typing.Rect]):
+                            y_offset = video_height // 20
+                            x_offset = video_width // 20
+                            for plate in found_plates:
+                                x, y, width, height = plate
+                                registration_plate = frame[
+                                  y : y + height, x : x + width
+                                ]
+                                new_height = height * 20
+                                new_width = width * 20
+                                big_plate = cv2.resize(registration_plate,
+                                                      (new_width, new_height))
+                                frame[
+                                    y_offset : y_offset + new_height,
+                                    x_offset : x_offset + new_width
+                                ] = big_plate
+                                cv2.rectangle(
+                                  frame, (x, y),
+                                  (x + width, y + height), (0, 255, 0), 5
+                                )
+                                y_offset += new_height + 10
+
+
+                        video_width, video_height, framerate = next(
+                            (
+                                 (
+                                     s["width"],
+                                     s["height"],
+                                     int(s["r_frame_rate"].split("/")[0])
+                                 ) for s in ffmpeg.probe(INPUT_FILE)["streams"]
+                                 if s["codec_type"] == "video"
+                            )
+                        )
+
+                        process1 = (
+                            ffmpeg.input(INPUT_FILE)
+                            .video.filter("fps", framerate)
+                            .output("pipe:", format="rawvideo", pix_fmt="bgr24")
+                            .run_async(pipe_stdout=True)
+                        )
+
+                        process2 = (
+                            ffmpeg.input(
+                                "pipe:",
+                                format="rawvideo",
+                                pix_fmt="bgr24",
+                                s=f"{video_width}x{video_height}",
+                                framerate=framerate // 4,
+                            )
+                            .output(OUTPUT_FILE, pix_fmt="yuv420p")
+                            .overwrite_output()
+                            .run_async(pipe_stdin=True)
+                        )
+
+                        classifier = cv2.CascadeClassifier(
+                          "haarcascade_plate_number.xml"
+                        )
+
+                        while in_bytes := process1.stdout.read(
+                          video_width * video_height * 3):
+                            in_frame = (
+                                np.frombuffer(in_bytes, np.uint8)
+                                .reshape([video_height, video_width, 3])
+                                .astype(np.uint8)
+                            )
+                            frame = in_frame.copy()
+                            found_plates = classifier.detectMultiScale(
+                                frame, minNeighbors=4, scaleFactor=1.05, minSize=(50, 20), maxSize=(100, 40)
+                            )
+                            mark_plates(frame, found_plates)
+                            process2.stdin.write(frame.astype(np.uint8).tobytes())
+
+                        process2.stdin.close()
+                        process1.wait()
+                        process2.wait()
+
+                  </code></pre>
+              </section>
+
+              <section data-background-color="var(--r-selection-background-color)">
+                <video data-autoplay src="assets/outputs/viofo_marked.mp4"></video>
+              </section>
+          </section>
+          <section>
+              <section>
+                <h2>Testing</h2>
+                <ul>
+                    <li>For simple processing, just use <pre>ffmpeg.probe()</pre></li>
+                    <li>Use <pre>ffmpeg.compile()</pre> to retrieve the generated command.</li>
+                    <li>The FFMpeg maintainers provide a diverse library of multimedia samples at <a href="http://fate-suite.ffmpeg.org/">fate-suite.ffmpeg.org</a></li>
+                </ul>
+              </section>
+              <section>
+              <h2>Conclusions</h2>
+              <ul>
+                  <li>FFmpeg is very powerful and complex - <pre>ffmpeg -h full</pre></li>
+                  <li>When using it for complex multimedia processing it's better to use a good binding, like <pre>ffmpeg-python</pre>.</li>
+                  <li>Basic operations are  (przycinanie materiałów, konwersja napisów, kompresja video, ...)</li>
+              </ul>
+              </section>
+
+              <section>
+                  <h2>Thank you!</h2>
+                  <a href="https://github.com/mRokita/pywaw-ffmpeg">https://github.com/mRokita/pywaw-ffmpeg</a>
+                  <a href="https://mrokita.github.io/pywaw-ffmpeg/index.html">https://mrokita.github.io/pywaw-ffmpeg/index.html</a>
+              </section>
+              <section>
+              <h2>Bonus - tracking progress</h2>
+              <pre class="r-stretch"><code class="python" data-line-numbers="1-7|10-22|25-41|44|45-50|51-52|53-64|65" data-trim data-noescape>
+                    import socket
+                    from threading import Thread
+                    from contextlib import contextmanager
+                    import tempfile
+                    import ffmpeg
+                    from pathlib import Path
+                    from tqdm import tqdm
+
+
+                    @contextmanager
+                    def open_progress_socket():
+                        with tempfile.TemporaryDirectory() as tempdir:
+                            sock = socket.socket(
+                                socket.AF_UNIX, socket.SOCK_STREAM)
+                            socket_filename = Path(tempdir) / "progress.sock"
+                            sock.bind(str(socket_filename))
+                            sock.settimeout(15)
+                            try:
+                                sock.listen(1)
+                                yield sock, socket_filename
+                            finally:
+                                sock.close()
+
+
+                    def watch_progress(sock: socket.socket, total_duration: int):
+                        conn, _ = sock.accept()
+                        abs_progress = 0
+                        with tqdm(total=total_duration) as pbar:
+                            while rec := conn.recv(4096):
+                                out_time_us = dict(
+                                    map(
+                                        lambda x: x.split("="),
+                                        rec.decode("utf-8").split("\n")[:-1],
+                                    )
+                                )["out_time_us"]
+                                processed_seconds = round(
+                                    int(out_time_us) / 1000000
+                                )
+                                delta = processed_seconds - abs_progress
+                                pbar.update(delta)
+                                abs_progress = processed_seconds
+
+
+                    with open_progress_socket() as (sock, socket_filename):
+                        total_duration = float(
+                            ffmpeg.probe(
+                                "outputs/viofo_marked.mp4"
+                            )["streams"][0]["duration"]
+                        )
+                        print(f"Total duration: {total_duration}")
+                        t = Thread(target=watch_progress, args=(sock, total_duration))
+                        t.start()
+                        (
+                            ffmpeg.input("outputs/viofo_marked.mp4")
+                            .output(
+                                "outputs/viofo_marked_h265.mp4",
+                                vcodec="hevc"
+                            )
+                            .overwrite_output()
+                            .global_args(
+                                "-progress",
+                                f"unix://{socket_filename}"
+                            )
+                        ).run(quiet=True)
+                        t.join()
+
+              </code></pre>
+              </section>
+              <section data-background-color="var(--r-selection-background-color)">
+                  <h2>Tracking progress</h2>
+                <div class="window-frame">
+                    <div class="top-bar">
+                        <div class="control min"></div>
+                        <div class="control max"></div>
+                        <div class="control close"></div>
+                    </div>
+                    <div class="asciinema"
+                         data-cast="assets/watch_progress.cast"></div>
+                </div>
+            </section>
+          </section>
+
+    </div>
+</div>
+
+<script src="assets/common/asciinema-player.min.js"></script>
+<script src="assets/common/reveal.min.js"></script>
+<script src="assets/common/notes.js"></script>
+<script src="assets/common/markdown.js"></script>
+<script src="assets/common/highlight.js"></script>
+<script src="assets/common/zoom.js"></script>
+<script src="assets/common/mermaid.min.js"></script>
+<script src="assets/common/config.js"></script>
+
+</body>
+
+</html>
