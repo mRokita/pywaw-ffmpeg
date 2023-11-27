@@ -25,6 +25,7 @@
                     ## What is FFMpeg exactly?
 
                     - A versatile tool for multimidedia processing.
+                    - Supports most of audio, video & subtitle codecs and formats
                     - Used internally by Google Chrome, Audacity, Blender, OBS Studio, Emby/Jellyfin and many more.
                     - Built in 2000 by Fabrice Bellard.
                 </textarea>
@@ -32,6 +33,35 @@
         </section>
         <section>
             <section>
+                <h2>Trimming a video file</h2>
+                <pre><code data-trim data-noescape>
+                    ffmpeg -hide_banner -i video.mp4 \
+                        -ss 00:00:30 -t 10 \
+                        -y video_trim.mp4
+                </code></pre>
+            </section>
+
+            <section data-background-color="var(--r-selection-background-color)">
+                <h2>Original video</h2>
+                <video data-autoplay loop src="assets/viofo_ph.mp4"></video>
+            </section>
+
+            <section data-background-color="var(--r-selection-background-color)">
+                <h2>Edge detection using ffmpeg</h2>
+                <div class="window-frame">
+                    <div class="top-bar">
+                        <div class="control min"></div>
+                        <div class="control max"></div>
+                        <div class="control close"></div>
+                    </div>
+                    <div class="asciinema"
+                         data-cast="assets/edge_detect.cast"></div>
+                </div>
+            </section>
+            <section data-background-color="var(--r-selection-background-color)">
+                <video data-autoplay loop src="assets/outputs/canny_edge_viofo.mp4"></video>
+            </section>
+          <section>
                 <h2>ffprobe</h2>
                     <pre><code data-trim data-noescape>
                     ffprobe -hide_banner video2.mp4
@@ -62,32 +92,12 @@
                       </code></pre>
             </section>
             <section>
-                <h2>Trimming a video file</h2>
-                <pre><code data-trim data-noescape>
-                    ffmpeg -hide_banner -i video.mp4 \
-                        -ss 00:00:30 -t 10 \
-                        -y video_trim.mp4
-                </code></pre>
-            </section>
-            <section data-background-color="var(--r-selection-background-color)">
-                <h2>Original video</h2>
-                <video data-autoplay loop src="assets/viofo_ph.mp4"></video>
-            </section>
-
-            <section data-background-color="var(--r-selection-background-color)">
-                <h2>Edge detection using ffmpeg</h2>
-                <div class="window-frame">
-                    <div class="top-bar">
-                        <div class="control min"></div>
-                        <div class="control max"></div>
-                        <div class="control close"></div>
-                    </div>
-                    <div class="asciinema"
-                         data-cast="assets/edge_detect.cast"></div>
-                </div>
-            </section>
-            <section data-background-color="var(--r-selection-background-color)">
-                <video data-autoplay loop src="assets/outputs/canny_edge_viofo.mp4"></video>
+                <h2>Complex filtering</h2>
+                <ul>
+                  <li>Generate an RGB color histogram from the source video</li>
+                  <li>Run edge detection source video</li>
+                  <li>Place the results of the above on top of the source video as an overlay</li>
+                </ul>
             </section>
             <section>
                 <h2>Complex filtering</h2>
